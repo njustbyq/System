@@ -1,4 +1,4 @@
-package Stone.Parser
+package Stone.Parser;
 
 import Stone.AST.ASTLeaf;
 import Stone.AST.ASTList;
@@ -26,5 +26,22 @@ import java.lang.reflect.Constructor;
          protected abstract boolean match(Lexer lexer) throws ParseException;
      }
 
-     
- }
+     protected static class Tree extends Element {
+         protected Parser parser;
+
+         protected Tree(Parser p) {
+             parser = p;
+         }
+
+        protected void parse(Lexer lexer, List<Pava.AST.ASTree> res)
+                 throws ParseException {
+            res.add(parser.parse(lexer));        
+        }
+
+        protected boolean match(Lexer lexer) throws ParseException {
+            return parser.match(lexer);
+        }
+    }
+
+    
+}

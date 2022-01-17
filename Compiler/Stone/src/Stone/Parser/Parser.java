@@ -18,30 +18,11 @@ import java.lang.reflect.Constructor;
  * A parser for grammatical analysis
  */
 
- public class Parser {
-     protected static abstract class Element {
-         protected abstract void parse(Lexer lexer, List<ASTree> res)
+public class Parser {
+    protected static abstract class Element {
+        protected abstract void parse(Lexer lexer, List<ASTree> res)
                 throws ParseException;
          
-         protected abstract boolean match(Lexer lexer) throws ParseException;
-     }
-
-     protected static class Tree extends Element {
-         protected Parser parser;
-
-         protected Tree(Parser p) {
-             parser = p;
-         }
-
-        protected void parse(Lexer lexer, List<Pava.AST.ASTree> res)
-                 throws ParseException {
-            res.add(parser.parse(lexer));        
-        }
-
-        protected boolean match(Lexer lexer) throws ParseException {
-            return parser.match(lexer);
-        }
+        protected abstract boolean match(Lexer lexer) throws ParseException;
     }
-
-    
-}
+}    

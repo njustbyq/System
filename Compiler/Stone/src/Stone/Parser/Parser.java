@@ -10,6 +10,12 @@ import Stone.Token.Token;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+
+import javax.naming.PartialResultException;
+
+import Pava.Evaluator.BasicEvaluator.ASTLeafEx;
+import Pava.Evaluator.BasicEvaluator.ASTreeEx;
+
 import java.util.ArrayList;
 import java.lang.reflect.Method;
 import java.lang.invoke.ClassSpecializer.Factory;
@@ -154,6 +160,137 @@ public class Parser {
         }     
     }
     
+    protected static class StrToken extends AToken {
+        protected StrToken(Class<? extends ASTLeaf> type) {
+            super(type);
+        }
+
+        protected boolean test(Pava.Token.Token t) {
+            return t.isString();
+        }
+    }
+
+    protected static class Leaf extends Element {
+        protected String[] tokens;
+
+        protected Leaf(String[] pat) {
+            tokens = pat;
+        }
+
+        protected void parse(Lexer lexer, List<ASTLeaf> res) 
+                throws ParseException {
+            Pava.Token.Token t = lexer.read();
+            if (t.isIdentifier())
+                for (String token : tokens)
+                    if (token.equals(t.hashCode())) {
+                        find(res, t);
+                        return;
+                    }
+            
+            if (tokens.length > 0)
+                throw new ParseException(tokens[0] + " expected.", t);
+            else
+                throw new ParseException(t);
+        }
+
+        protected void find(List<ASTree> res, Token t) {
+            res.add(new ASTLeaf(t));
+        }
+
+        protected boolean match(Lexer lexer) throws ParseException {
+            Pava.Token.Token t = lexer.peek(0);
+            if (t.isIdentifier())
+                for (String token : tokens)
+                    if (token.equals(t.getText()))
+                        return true;
+            
+            return false;
+        }
+    }
+
+    protected static class Skip extends Lef {
+        protected Skip(String[] t) {
+            super(t);
+        }
+
+        protected void find(List<ASTLeaf> res, Token t) {
+        }
+    }
+
+    public static class Precedence {
+        int value;
+        boolean leftAssoc;
+
+        public Precedence(int v, boolean a) {
+            value = v;
+            leftAssoc = a;
+        }
+    }
+
+    public static class Operators extends HashMap<String, Precedence> {
+        public static boolean LEFT = true;
+        public static boolean RIGHT = false;
+
+        public void add(String name, int prec, boolean leftAssoc) {
+            put(name, new Precedence(prec, leftAssoc));
+        }
+    }
+
+    protected static class Expr extends Element {
+        protected Factory factory;
+        protected Operators ops;
+        protected Parser factor;
+
+        protected Expr(Class<? extends ASTree> clazz, Parser exp,
+                      Operators map) {
+            factory = Factory.getForASTList(clazz);
+            ops = map;
+            factor = exp;
+        }
+
+        public void parse(lexer lexer, List<Pava.AST.ASTree> res) throws ParseException {
+            ASTree right = factor.parse(lexer);
+            Precedence prec;
+            while ((prec = nextOperator(lexer)) != null)
+                right = doShift(lexer, right, prec.value);
+            
+                res.add(right);
+        }
+
+        private ASTree doShift(Pava.Lexer lexer, ASTree left, int prec)
+                throws ParseException {
+            ArrayList<Pava.AST.ASTree> list = new ArrayList<ASTree>();
+            list.add(left);
+            list.add(new ASTLeaf(lexer.read()));
+            ASTree right = factor.parse(lexer);
+            Precedence next;
+            while ((next = nextOperator(lexer)) != null 
+                    && rightIsExpr(prec, next))
+                right = doShift(lexer, right, next.value);
+            
+            list.add(right);
+            return factory.make(list);
+        }
+
+        private Precedence nextOperator(Lexer lexer) throws ParseException {
+            Token t = lexer.peek(0);
+            if (t.isIdentifier())
+                return ops.get(t.getText());
+            else
+                return null;
+        }
+
+        private static boolean rightIsExpr(int prec, Precedence nextPrec) {
+            if (nextPrec.leftAssoc)
+                return prec < nextPrec.value;
+            else 
+                return prec <= nextPrec.value;
+        }
+
+        protected boolean match(Lexer lexer) throws ParseException {
+            return factor.match(lexer);
+        }
+    }
     
 
 }    

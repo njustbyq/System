@@ -11,6 +11,16 @@ int  *text,              // text segment
      *old_text,          // for dump text segment
      *stack;             // stack
 char *data;              // data segment
+int  *pc,                // program counter
+     *bp,                // base pointer
+     *sp,                // stack pointer
+     ax, cycle;          // virtual machine registers
+
+// instructions
+enum { LEA, IMM, JMP, CALL, JZ, JNZ, ENT, ADJ, LEV, LI, LC, SI, SC, PUSH,
+       OR, XOR, AND, EQ, NE, LT, GT, LE, GE, SHL, SHR, ADD, SUB, MUL, DIV, MOD,
+       OPEN, READ, CLOS, PRTF, MALC, MSET, MCMP, EXIT
+};
 
 void next() {
     token = *src++;
@@ -30,6 +40,16 @@ void program() {
 }
 
 int eval() {
+    int op, *tmp;
+    while (1) {
+        op = *pc++;                                                            // get next operation code
+
+        if (op == IMM)       {ax = *pc++;}                                     // load immediate value to ax
+        else if (op == LC)   {ax = *(char *)ax;}                               // load character to ax, address in ax
+        else if (op == LI)   {ax = *(int *)ax;}                                // load integer to ax, address in ax
+        else if (op == SC)   {ax = *(char *)*sp++ = ax;}                       // save character to address, value in ax, address on stack
+        else if (op == SI)   {*(int *)*sp++ = ax;}                             // save integer to address, value in ax, address on stack
+    }
     return 0;
 }
 
@@ -80,6 +100,9 @@ int main(int argc, char **argv)
     memset(text, 0, poolsize);
     memset(data, 0, poolsize);
     memset(stack, 0, poolsize);
+
+    bp = sp = (int *)((int)stack + poolsize);
+    ax = 0;
 
     program();
     return eval();

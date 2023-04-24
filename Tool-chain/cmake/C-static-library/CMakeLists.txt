@@ -9,6 +9,8 @@ project(hello_binary)
 # Generate the static library from the library sources
 # The add_library() function is used to create a library from some source files.
 
+# As with the previous example on static libraries, the add_library() function is also used to create a shared library from some source files.
+# We can just replace STATIC with SHARED to generate shared library
 add_library(hello_library STATIC src/Hello.cpp)
 
 target_include_directories(hello_library PUBLIC ${PROJECT_SOURCE_DIR}/include)

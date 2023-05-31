@@ -4,6 +4,7 @@
 #include <string.h>
 
 int  token;              // current token
+int  token_val;          // value of current token (mainly for number)
 char *src, *old_src;     // pointer to source code string
 int  poolsize;           // default size of text/data stack
 int  line;               // line number
@@ -15,6 +16,9 @@ int  *pc,                // program counter
      *bp,                // base pointer
      *sp,                // stack pointer
      ax, cycle;          // virtual machine registers
+int  *current_id,        // current parsed ID
+     *symbols;           // symbol table
+int  *idmain;            // the 'main' function
 
 // instructions
 enum { LEA, IMM, JMP, CALL, JZ, JNZ, ENT, ADJ, LEV, LI, LC, SI, SC, PUSH,
@@ -28,6 +32,9 @@ enum {
     Char, Else, Enum, Int, Return, Sizeof, While,
     Assign, Cond, Lor, Lan, Or, Xor, And, Eq, Ne, Lt, Gt, Le, Ge, Shl, Shr, Add, Sub, Mul, Div, Mod, Inc, Dec, Brak
 };
+
+// fields of identifier
+enum {Token, Hash, Name, Type, Class, Value, Btype, BClass, BValue, IdSize};
 
 void next() {
     char *last_pos;

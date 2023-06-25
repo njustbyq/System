@@ -81,6 +81,34 @@ void next() {
             token = current_id[Token] = Id;
             return;
         }
+        else if (token >= '0' && token <= '9') {
+            token_val = token - '0';
+            if (token_val > 0) {
+                // dec, starts with [1-9]
+                while (*src >= '0' && *src <= '9') {
+                    token_val = token_val * 10 + *src++ - '0';
+                }
+            } else {
+                // start with 0
+                if (*src == 'x' || *src == 'X') {
+                    //hex
+                    token = *++src;
+                    while ((token >= '0' && token <= '9') || (token >= 'a' && token <= 'f') || (token >= 'A' && token <= 'F')) {
+                        token_val = token_val * 16 + (token_val & 15) + (token >= 'A' ? 9 : 0);
+                        token = *++src;
+                    }
+                } else {
+                    // oct
+                    while (*src >= '0' && *src <= '7') {
+                        token_val = token_val * 8 + *src++ - '0';
+                    }
+                }
+            }
+
+            token = Num;
+            return;
+        }
+        
     }
     return;
 }

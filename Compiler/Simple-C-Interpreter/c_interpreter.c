@@ -108,8 +108,123 @@ void next() {
             token = Num;
             return;
         }
-        
-    }
+        else if (token == '"' || token == '\'') {
+            // parse string literal, currently, the only supported escape
+            // character is '\n', store the string literal into data.
+            last_pos = data;
+            while (*src != 0 && *src != token) {
+                token_val = *src++;
+                if (token_val == '\\') {
+                    // escape character
+                    token_val = *src++;
+                    if (token_val == 'n') {
+                        token_val = '\n';
+                    }
+                }
+
+                if (token == '"') {
+                    *data++ = token_val;
+                }
+            }
+
+            src++;
+            // if it is a single character, return Num token
+            if (token == '"') {
+                token_val = (int)last_pos;
+            } else {
+                token = Num;
+            }
+
+            return;
+        }
+        else if (token == '/') {
+            if (*src == '/') {
+                // skip comments
+                while (*src != 0 && *src != '\n') {
+                    ++src;
+                }
+            } else {
+                // divide operator
+                token = Div;
+                return;
+            }
+        }
+        else if (token == '=') {
+            // parse "==" and "="
+            if (*src == '=') {
+                src++;
+                token = Eq;
+            } else {
+                token = Assign;
+            }
+            return;
+        }
+        else if (token == '+') {
+            // parse '+' and '++'
+            if (*src == '+') {
+                src++;
+                token = Inc;
+            } else {
+                token = Add;
+            }
+            return;
+        }
+        else if (token == '-') {
+            // parse '-' and '--'
+            if (*src == '-') {
+                src++;
+                token = Dec;
+            } else {
+                token = Sub;
+            }
+            return;
+        }
+        else if (token == '<') {
+            // parse '<=', '<<' or '<'
+            if (*src == '=') {
+                src++;
+                token = Le;
+            } else if (*src == '<') {
+                src++;
+                token = Shl;
+            } else {
+                token = Lt;
+            }
+            return;
+        }
+        else if (token == '>') {
+            // parse ">=", ">>" or '>'
+            if (*src == '=') {
+                src++;
+                token = Ge; 
+            } else if (*src == '>') {
+                src++;
+                token = Shr;
+            } else {
+                token = Gt;
+            }
+            return;
+        }
+        else if (token == '|') {
+            // parse '|' or '||'
+            if (*src == '|') {
+                src++;
+                token = Lor;
+            } else {
+                token = Or;
+            }
+            return;
+        }
+        else if (token == '&') {
+            // parse '&' and '&&'
+            if (*src == '&') {
+                src++;
+                token = Lan;
+            } else {
+                token = And;
+            }
+            return;
+        }
     return;
 }
 

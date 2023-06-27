@@ -225,6 +225,31 @@ void next() {
             }
             return;
         }
+        else if (token == '^') {
+            token = Xor;
+            return;
+        }
+        else if (token == '%') {
+            token = Mod;
+            return;
+        }
+        else if (token == '*') {
+            token = Mul;
+            return;
+        }
+        else if (token == '[') {
+            token = Brak;
+            return;
+        }
+        else if (token == '?') {
+            token = Cond;
+            return;
+        }
+        else if (token == '~' || token == ';' || token == '{' || token == '}' || token == '(' || token == ']' || token == ',' || token == ':') {
+            // directly return the character as token;
+            return;
+        }
+    }
     return;
 }
 
